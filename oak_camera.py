@@ -47,9 +47,9 @@ class OakCameraThread(Thread):
                     try:
                         print(f'w: {in_rgb.getWidth()}, h: {in_rgb.getHeight()}')
                         self.current_image = Image.frombytes(
-                            'RGB',
+                            'RGBA',
                             (in_rgb.getWidth(), in_rgb.getHeight()),
-                            in_rgb.still
+                            in_rgb.getCvFrame()
                         )
                     finally:
                         self.lock.release()
