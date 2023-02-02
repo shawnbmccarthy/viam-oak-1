@@ -46,9 +46,10 @@ class OakCameraThread(Thread):
 
                     self.lock.acquire()
                     try:
+                        print(f'w: {in_rgb.getWidth()}, h: {in_rgb.getHeight()}, frame: {in_rgb.getFrame()}')
                         self.current_image = Image.frombytes(
                             'RGBA',
-                            (in_rgb.getHeight(), in_rgb.getWidth()),
+                            (in_rgb.getWidth(), in_rgb.getHeight()),
                             in_rgb.getFrame(),
                             'raw'
                         )
