@@ -43,12 +43,7 @@ class OakCameraThread(Thread):
                 in_rgb = q_rgb.tryGet()
 
                 if in_rgb is not None:
-                    print('debug: inside not none loop')
-                    raw = in_rgb.getRaw()
-                    print(f'raw: {raw}')
-                    print(f'raw buffer: {raw.data}')
-                    data = raw.data.data
-                    print(f'raw data: {raw.data.data}')
+                    data = in_rgb.getRaw().data
 
                     self.lock.acquire()
                     try:
