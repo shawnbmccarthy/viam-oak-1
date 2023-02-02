@@ -1,5 +1,6 @@
 import viam.media.video
 import depthai
+import PIL
 from threading import Thread, Lock
 from typing import Dict, Any, Optional, Tuple, Union
 from PIL import Image
@@ -74,7 +75,7 @@ class OakCamera(Camera):
             *,
             timeout: Optional[float] = None,
             **kwargs
-    ) -> Union[Image, viam.media.video.RawImage]:
+    ) -> Union[PIL.Image.Image, viam.media.video.RawImage]:
         """
 
         :param mime_type:
