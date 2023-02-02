@@ -27,6 +27,7 @@ class OakCameraThread(Thread):
     def _setup_pipeline(self):
         self.pipeline = depthai.Pipeline()
         self.cam_rgb = self.pipeline.create(depthai.node.ColorCamera)
+        self.cam_rgb.setStillSize((800, 600))
         self.cam_rgb.setVideoSize((800, 600))
         self.xout_rgb = self.pipeline.create(depthai.node.XLinkOut)
         self.xout_rgb.setStreamName('rgb')
@@ -43,6 +44,7 @@ class OakCameraThread(Thread):
                 in_rgb = q_rgb.tryGet()
 
                 if in_rgb is not None:
+                    print(f'in_rgb type: {type(in_rgb)}')
                     self.lock.acquire()
                     try:
                         print(f'w: {in_rgb.getWidth()}, h: {in_rgb.getHeight()}')
