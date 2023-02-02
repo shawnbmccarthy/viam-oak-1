@@ -89,7 +89,7 @@ class OakCamera(Camera):
         :param kwargs:
         :return:
         """
-        return self.oct.get_image()
+        raise NotImplemented('todo')
 
     async def get_point_cloud(
             self,
