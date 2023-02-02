@@ -43,11 +43,15 @@ class OakCameraThread(Thread):
                 in_rgb = q_rgb.tryGet()
 
                 if in_rgb is not None:
-                    data = in_rgb.getRaw().data
 
                     self.lock.acquire()
                     try:
-                        self.current_image = Image.frombytes('RGB', (128, 128), data, 'raw')
+                        self.current_image = Image.frombytes(
+                            'RGBA',
+                            (in_rgb.getHeight(), in_rgb.getWidth()),
+                            in_rgb.getFrame(),
+                            'raw'
+                        )
                     finally:
                         self.lock.release()
 
