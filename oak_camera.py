@@ -27,11 +27,13 @@ class OakCameraThread(Thread):
     def _setup_pipeline(self):
         self.pipeline = depthai.Pipeline()
         self.cam_rgb = self.pipeline.create(depthai.node.ColorCamera)
-        self.cam_rgb.setStillSize((800, 600))
-        self.cam_rgb.setPreviewSize(800, 600)
+        self.cam_rgb.setPreviewSize(300, 300)
+        self.cam_rgb.setBoardSocket(depthai.CameraBoardSocket.RGB)
+        self.cam_rgb.setResolution(depthai.ColorCameraProperties.SensorResolution.THE_1080_P)
+        self.cam_rgb.setInterleaved(False)
+        self.cam_rgb.setColorOrder(depthai.ColorCameraProperties.ColorOrder.RGB)
         self.xout_rgb = self.pipeline.create(depthai.node.XLinkOut)
         self.xout_rgb.setStreamName('rgb')
-        self.cam_rgb.setInterleaved(False)
 
     def get_image(self):
         return self.current_image
@@ -41,7 +43,6 @@ class OakCameraThread(Thread):
         with depthai.Device(self.pipeline) as device:
             q_rgb = device.getOutputQueue('rgb', maxSize=1, blocking=False)
             while self.running:
-                print(f'while')
                 in_rgb = q_rgb.tryGet()
 
                 if in_rgb is not None:
