@@ -50,7 +50,7 @@ class OakCameraThread(Thread):
                         print(f'w: {in_rgb.getWidth()}, h: {in_rgb.getHeight()}')
                         self.current_image = Image.frombytes(
                             'RGB',
-                            (1280, 720),
+                            (in_rgb.getWidth(), in_rgb.getHeight()),
                             in_rgb.getFrame()
                         )
                     finally:
