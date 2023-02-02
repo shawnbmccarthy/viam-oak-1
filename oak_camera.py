@@ -39,7 +39,7 @@ class OakCameraThread(Thread):
         return self.current_image
 
     def run(self) -> None:
-        with OakCamera as oak:
+        with OakCamera() as oak:
             color = oak.create_camera('color')
             pipeline = oak.build()
             out = pipeline.create(depthai.node.XLinkOut)
