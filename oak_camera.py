@@ -1,5 +1,6 @@
 import viam.media.video
 import depthai
+from depthai_sdk import OakCamera
 import PIL
 from threading import Thread, Lock
 from typing import Dict, Any, Optional, Tuple, Union
@@ -28,7 +29,8 @@ class OakCameraThread(Thread):
         self.cam_rgb = self.pipeline.create(depthai.node.ColorCamera)
         self.xout_rgb = self.pipeline.create(depthai.node.XLinkOut)
         self.xout_rgb.setStreamName('rgb')
-        self.cam_rgb.setPreviewSize(4032, 3040)
+
+        self.cam_rgb.setPreviewSize(800, 3040)
         self.cam_rgb.setInterleaved(False)
         self.cam_rgb.setColorOrder(depthai.ColorCameraProperties.ColorOrder.RGB)
         self.cam_rgb.preview.link(self.xout_rgb.input)
@@ -37,16 +39,19 @@ class OakCameraThread(Thread):
         return self.current_image
 
     def run(self) -> None:
-        with depthai.Device(self.pipeline) as device:
-            q_rgb = device.getOutputQueue('rgb', maxSize=1, blocking=False)
-            while self.running:
-                in_rgb = q_rgb.tryGet()
+        with OakCamera as oak:
+            color = oak.create_camera('color')
+            pipeline = oak.build()
+            out = pipeline.create(depthai.node.XLinkOut)
+            out.setStreamName('rgb')
 
+            oak.start()
+            q = oak.device.getOutputQueue('rgb', maxSize=1, blocking=False)
+            while oak.running():
+                in_rgb = q.tryGet()
                 if in_rgb is not None:
-
                     self.lock.acquire()
                     try:
-                        print(f'w: {in_rgb.getWidth()}, h: {in_rgb.getHeight()}, frame: {in_rgb.getFrame()}')
                         self.current_image = Image.frombytes(
                             'RGB',
                             (in_rgb.getWidth(), in_rgb.getHeight()),
@@ -54,6 +59,24 @@ class OakCameraThread(Thread):
                         )
                     finally:
                         self.lock.release()
+
+        #with depthai.Device(self.pipeline) as device:
+        #    q_rgb = device.getOutputQueue('rgb', maxSize=1, blocking=False)
+        #    while self.running:
+        #        in_rgb = q_rgb.tryGet()
+
+        #        if in_rgb is not None:
+
+        #            self.lock.acquire()
+        #            try:
+        #                print(f'w: {in_rgb.getWidth()}, h: {in_rgb.getHeight()}, frame: {in_rgb.getFrame()}')
+        #                self.current_image = Image.frombytes(
+        #                    'RGB',
+        #                    (in_rgb.getWidth(), in_rgb.getHeight()),
+        #                    in_rgb.getFrame()
+        #                )
+        #            finally:
+        #                self.lock.release()
 
     def stop(self) -> None:
         self.running = False
