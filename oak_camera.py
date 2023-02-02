@@ -50,8 +50,7 @@ class OakCameraThread(Thread):
                         self.current_image = Image.frombytes(
                             'RGBA',
                             (in_rgb.getWidth(), in_rgb.getHeight()),
-                            in_rgb.getFrame(),
-                            'raw'
+                            in_rgb.getFrame()
                         )
                     finally:
                         self.lock.release()
