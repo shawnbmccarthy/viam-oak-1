@@ -43,7 +43,7 @@ class OakCameraThread(Thread):
         with depthai.Device(self.pipeline) as device:
             q_rgb = device.getOutputQueue('rgb', maxSize=1, blocking=False)
             while self.running:
-                in_rgb = q_rgb.get()
+                in_rgb = q_rgb.tryGet()
 
                 if in_rgb is not None:
                     print(f'in_rgb type: {type(in_rgb)}')
@@ -53,7 +53,7 @@ class OakCameraThread(Thread):
                         self.current_image = Image.frombytes(
                             'RGBA',
                             (in_rgb.getWidth(), in_rgb.getHeight()),
-                            in_rgb.getCvFrame()
+                            in_rgb.getRaw()
                         )
                     finally:
                         self.lock.release()
