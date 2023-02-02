@@ -43,7 +43,7 @@ class OakCameraThread(Thread):
         with depthai.Device(self.pipeline) as device:
             q_rgb = device.getOutputQueue('rgb', maxSize=1, blocking=False)
             while self.running:
-                in_rgb = q_rgb.tryGet()
+                in_rgb = q_rgb.get()
 
                 if in_rgb is not None:
                     print(f'in_rgb type: {type(in_rgb)}')
@@ -58,7 +58,7 @@ class OakCameraThread(Thread):
                     finally:
                         self.lock.release()
                 else:
-                    print(f'in_rgb: {in_rgb}')
+                    print(f'else in_rgb: {in_rgb}')
 
     def stop(self) -> None:
         self.running = False
