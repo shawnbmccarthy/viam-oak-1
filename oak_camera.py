@@ -28,11 +28,10 @@ class OakCameraThread(Thread):
         self.pipeline = depthai.Pipeline()
         self.cam_rgb = self.pipeline.create(depthai.node.ColorCamera)
         self.cam_rgb.setStillSize((800, 600))
-        self.cam_rgb.setVideoSize((800, 600))
+        self.cam_rgb.setPreviewSize(800, 600)
         self.xout_rgb = self.pipeline.create(depthai.node.XLinkOut)
         self.xout_rgb.setStreamName('rgb')
         self.cam_rgb.setInterleaved(False)
-        self.cam_rgb.setColorOrder(depthai.ColorCameraProperties.ColorOrder.RGB)
 
     def get_image(self):
         return self.current_image
