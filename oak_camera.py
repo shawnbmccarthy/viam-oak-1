@@ -28,7 +28,7 @@ class OakCameraThread(Thread):
         self.cam_rgb = self.pipeline.create(depthai.node.ColorCamera)
         self.xout_rgb = self.pipeline.create(depthai.node.XLinkOut)
         self.xout_rgb.setStreamName('rgb')
-        #self.cam_rgb.setPreviewSize(300, 300)
+        self.cam_rgb.setPreviewSize(4032, 3040)
         self.cam_rgb.setInterleaved(False)
         self.cam_rgb.setColorOrder(depthai.ColorCameraProperties.ColorOrder.RGB)
         self.cam_rgb.preview.link(self.xout_rgb.input)
