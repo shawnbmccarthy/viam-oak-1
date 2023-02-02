@@ -32,7 +32,7 @@ class OakCameraThread(Thread):
         self.xout_rgb.setStreamName('rgb')
         self.cam_rgb.setInterleaved(False)
         self.cam_rgb.setColorOrder(depthai.ColorCameraProperties.ColorOrder.RGB)
-        self.cam_rgb.preview.link(self.xout_rgb.input)
+        #self.cam_rgb.preview.link(self.xout_rgb.input)
 
     def get_image(self):
         return self.current_image
@@ -47,9 +47,10 @@ class OakCameraThread(Thread):
 
                     self.lock.acquire()
                     try:
+                        print(f'w: {in_rgb.getWidth()}, h: {in_rgb.getHeight()}')
                         self.current_image = Image.frombytes(
                             'RGB',
-                            (800, 600),
+                            (1280, 720),
                             in_rgb.getFrame()
                         )
                     finally:
