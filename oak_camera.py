@@ -1,11 +1,19 @@
+import blobconverter
 import viam.media.video
 import depthai
-from depthai_sdk import OakCamera
+import cv2
 import PIL
+import numpy as np
 from threading import Thread, Lock
 from typing import Dict, Any, Optional, Tuple, Union
 from PIL import Image
 from viam.components.camera import Camera, DistortionParameters, IntrinsicParameters
+
+
+def frame_norm(frame, bbox):
+    norm_values = np.full(len(bbox), frame.shape[0])
+    norm_values[::2] = frame.shape[1]
+    return (np.clip(np.array(bbox), 0, 1) * norm_values).astype(int)
 
 
 class OakCameraThread(Thread):
@@ -16,49 +24,65 @@ class OakCameraThread(Thread):
         self.running = False
         self.current_image = None
         self.lock = Lock()
-        # which variables need to be object scoped?
-        self.pipeline = None
-        self.cam_rgb = None
-        self.xout_rgb = None
-        self._setup_pipeline()
         self.running = True
         super().__init__()
 
-    def _setup_pipeline(self):
-        self.pipeline = depthai.Pipeline()
-        self.cam_rgb = self.pipeline.create(depthai.node.ColorCamera)
-        self.cam_rgb.setPreviewSize(300, 300)
-        self.cam_rgb.setBoardSocket(depthai.CameraBoardSocket.RGB)
-        self.cam_rgb.setResolution(depthai.ColorCameraProperties.SensorResolution.THE_1080_P)
-        self.cam_rgb.setInterleaved(False)
-        self.cam_rgb.setColorOrder(depthai.ColorCameraProperties.ColorOrder.RGB)
-        self.xout_rgb = self.pipeline.create(depthai.node.XLinkOut)
-        self.xout_rgb.setStreamName('rgb')
-
     def get_image(self):
+        """
+
+        :return:
+        """
         return self.current_image
 
     def run(self) -> None:
+        """
+
+        :return:
+        """
         print(f'starting ...')
-        with depthai.Device(self.pipeline) as device:
-            q_rgb = device.getOutputQueue('rgb', maxSize=1, blocking=False)
+        pipeline = depthai.Pipeline()
+        cam_rgb = pipeline.createColorCamera()
+        cam_rgb.setPreviewSize(300, 300)
+        cam_rgb.setInterleaved(False)
+
+        detection_nn = pipeline.createMobileNetDetectionNetwork()
+        detection_nn.setBlobPath(blobconverter.from_zoo(name='mobilenet-ssd', shaves=6))
+        detection_nn.setConfidenceThreshold(0.5)
+        cam_rgb.preview.link(detection_nn.input)
+
+        xout_rgb = pipeline.createXLinkOut()
+        xout_rgb.setStreamName('rgb')
+        cam_rgb.preview.link(xout_rgb.input)
+
+        xout_nn = pipeline.createXLinkOut()
+        xout_nn.setStreamName('nn')
+        detection_nn.out.link(xout_nn.input)
+
+        with depthai.Device(pipeline) as device:
+            q_rgb = device.getOutputQueue('rgb')
+            q_nn = device.getOutputQueue('nn')
+            frame = None
+            detections = []
+
             while self.running:
                 in_rgb = q_rgb.tryGet()
+                in_nn = q_nn.tryGet()
 
                 if in_rgb is not None:
-                    print(f'in_rgb type: {type(in_rgb)}')
-                    self.lock.acquire()
-                    try:
-                        print(f'w: {in_rgb.getWidth()}, h: {in_rgb.getHeight()}')
-                        self.current_image = Image.frombytes(
-                            'RGBA',
-                            (in_rgb.getWidth(), in_rgb.getHeight()),
-                            in_rgb.getRaw()
-                        )
-                    finally:
-                        self.lock.release()
-                else:
-                    print(f'else in_rgb: {in_rgb}')
+                    frame = in_rgb.getCvFrame()
+
+                if in_nn is not None:
+                    detections = in_nn.detections
+
+                if frame is not None:
+                    for detection in detections:
+                        bbox = frame_norm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
+                        cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+                        self.lock.acquire()
+                        try:
+                            self.current_image = frame
+                        finally:
+                            self.lock.release()
 
     def stop(self) -> None:
         self.running = False
