@@ -80,7 +80,7 @@ class OakCameraThread(Thread):
                         cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
                         self.lock.acquire()
                         try:
-                            self.current_image = frame
+                            self.current_image = Image.fromarray(frame)
                         finally:
                             self.lock.release()
 
