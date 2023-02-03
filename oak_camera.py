@@ -80,7 +80,8 @@ class OakCameraThread(Thread):
                         cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
                         self.lock.acquire()
                         try:
-                            self.current_image = Image.fromarray(frame)
+                            f_tmp = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                            self.current_image = Image.fromarray(f_tmp)
                         finally:
                             self.lock.release()
 
