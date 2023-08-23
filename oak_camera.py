@@ -99,7 +99,7 @@ class OakCameraThread(Thread):
 
 
 class OakCamera(Camera):
-    MODEL: ClassVar[Model] = Model(ModelFamily("viam-labs", "oakd"), "d1")
+    MODEL: ClassVar[Model] = Model(ModelFamily("viam-labs", "oak"), "d1")
 
     @classmethod
     def new(cls, config: ComponentConfig, dependencies: Mapping[ResourceName, ResourceBase]) -> Self:
