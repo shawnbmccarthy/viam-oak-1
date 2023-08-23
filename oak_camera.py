@@ -4,10 +4,19 @@ import depthai
 import cv2
 import PIL
 import numpy as np
+
 from threading import Thread, Lock
 from typing import Dict, Any, Optional, Tuple, Union
-from PIL import Image
+from typing import ClassVar, Mapping
+from typing_extensions import Self
+
 from viam.components.camera import Camera, DistortionParameters, IntrinsicParameters
+from viam.proto.app.robot import ComponentConfig
+from viam.proto.common import ResourceName
+from viam.resource.base import ResourceBase
+from viam.resource.types import Model, ModelFamily
+
+from PIL import Image
 
 
 def frame_norm(frame, bbox):
@@ -90,6 +99,13 @@ class OakCameraThread(Thread):
 
 
 class OakCamera(Camera):
+    MODEL: ClassVar[Model] = Model(ModelFamily("viam-labs", "oak"), "d1")
+
+    @classmethod
+    def new(cls, config: ComponentConfig, dependencies: Mapping[ResourceName, ResourceBase]) -> Self:
+        resource = cls(config.name)
+        return resource
+
     def __init__(self, name: str) -> None:
         """
 
@@ -133,6 +149,34 @@ class OakCamera(Camera):
         :return:
         """
         raise NotImplemented('point cloud not supported')
+
+    async def get_images(
+            self,
+            *,
+            timeout: Optional[float] = None,
+            **kwargs
+    ) -> Tuple[bytes, str]:
+        """
+
+        :param timeout:
+        :param kwargs:
+        :return:
+        """
+        raise NotImplemented('get images not supported. try get image instead')
+
+    async def get_geometries(
+            self,
+            *,
+            timeout: Optional[float] = None,
+            **kwargs
+    ) -> Tuple[bytes, str]:
+        """
+
+        :param timeout:
+        :param kwargs:
+        :return:
+        """
+        raise NotImplemented('get geometries not supported')
 
     async def get_properties(
             self,
